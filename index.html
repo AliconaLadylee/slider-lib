@@ -14,41 +14,43 @@
             height: 60vh;
             margin: 0 auto;
         }
-
     </style>
 </head>
 
 <body>
     <div class="content">
         <h1>Mi Slider Personalizado</h1>
-        <div id="main-slider"></div>
+        <div id="main-slider">
+            <div class="slider-item">
+                <img src="https://citymall.net/assets/images/banners/pagina_principal/Portada pag web City Mall-36.jpg"
+                    alt="Descripción 2" loading="lazy" />
+            </div>
+            <div class="slider-item">
+                <img src="https://citymall.net/assets/images/banners/movil/Banner_146_05040640.jpg"
+                    alt="Descripción 2" loading="lazy" />
+            </div>
 
-        <div id="main-slider2"></div>
+            
+        </div>
+
     </div>
 
     <script src="slider-library.js"></script>
 
     <script>
-        const slider1 = new Slider('#main-slider', {
-            images: [
-                'https://picsum.photos/1200/600?random=1',
-                'https://picsum.photos/1200/600?random=2',
-                'https://picsum.photos/1200/600?random=3',
-                'https://picsum.photos/1200/600?random=4'
-            ],
+        const slider = new Slider('#main-slider', {
+            // images: [
+            // 'https://picsum.photos/1200/600?random=1',
+            // 'https://picsum.photos/1200/600?random=2',
+            // 'https://picsum.photos/1200/600?random=3',
+            // 'https://picsum.photos/1200/600?random=4'
+            // ],
             autoplay: true,
+            pagination: true,
+            arrows: true,
+            slideSelector: '.slider-item',
         });
 
-
-        const slider2 = new Slider('#main-slider2', {
-            images: [
-                'https://picsum.photos/1200/600?random=1',
-                'https://picsum.photos/1200/600?random=2',
-                'https://picsum.photos/1200/600?random=3',
-                'https://picsum.photos/1200/600?random=4'
-            ],
-            autoplay: true,
-        });
     </script>
 </body>
 

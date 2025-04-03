@@ -1,8 +1,6 @@
 /* slider-styles.css */
 /* Estilos base del slider */
 
-
-
 .aele__slider-container {
   position: relative;
   width: 100%;
@@ -97,14 +95,50 @@
   background-color: white;
 }
 
+
+
+
 /* Estilos responsivos */
+
+@media (max-width: 1024px) {
+  .aele__slider-container {
+    height: 60vh;
+  }
+}
+
+@media (max-width: 800px) {
+  .aele__slider-container {
+    height: 50vh;
+  }
+}
+
+
 @media (max-width: 768px) {
   .aele__slider-container {
-    height: 40vh;
+    height: 35vh;
   }
+}
 
-  .aele__slider-arrow {
-    width: 40px;
-    height: 40px;
+@media (max-width: 640px) {
+  .aele__slider-container {
+    height: 30vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .aele__slider-container {
+    height: 20vh;
+  }
+}
+
+@media (max-width: 320px) {
+  .aele__slider-container {
+    height: 15vh;
+  }
+}
+
+@media (max-width: 240px) {
+  .aele__slider-container {
+    height: 10vh;
   }
 }

@@ -2,18 +2,20 @@
 
 class Slider {
     constructor(selector, options = {}) {
-        // Configuración por defecto
         this.defaults = {
             images: [],
             autoplay: true,
             delay: 5000,
             transitionDuration: 500,
+            arrows: true,
             arrowSize: 50,
             arrowMargin: 20,
-            pagination: true
+            pagination: true,
+
+            slideSelector: '.aele__slider-item',
+            imageSelector: 'img',
         };
 
-        // Combinar opciones proporcionadas con los defaults
         this.config = { ...this.defaults, ...options };
         this.container = document.querySelector(selector);
         this.currentIndex = 0;
@@ -21,48 +23,54 @@ class Slider {
         this.userInteracted = false;
         this.interactionTimeout = null;
 
-        // Inicializar el slider
         this.init();
     }
 
     init() {
-        // Verificar que el contenedor exista
         if (!this.container) {
             console.error('Slider container not found');
             return;
         }
 
-        // Verificar que hay imágenes
-        if (this.config.images.length === 0) {
-            console.error('No images provided for the slider');
+        const existingSlides = this.container.querySelectorAll(this.config.slideSelector);
+        if (existingSlides.length > 0) {
+            this.slides = existingSlides;
+            this.setupExistingSlides();
+        } else if (this.config.images && this.config.images.length > 0) {
+
+            this.createSlidesFromArray();
+        } else {
+            console.error('No slides or images provided for the slider');
             return;
         }
 
+
         this.container.classList.add('aele__slider-container');
-
-        // Crear estructura HTML
-        this.createStructure();
-
-        // Configurar eventos
+        this.createNavigation();
         this.setupEventListeners();
 
-        // Iniciar autoplay si está configurado
         if (this.config.autoplay) {
             this.startAutoplay();
         }
     }
 
-    createStructure() {
-        // Limpiar contenedor
-        this.container.innerHTML = '';
+    setupExistingSlides() {
+        this.slides.forEach((slide, index) => {
+            slide.dataset.index = index;
+            slide.classList.add('aele__slider-item');
+            slide.classList.toggle('active', index === 0);
+            slide.setAttribute('aria-hidden', index !== 0);
 
-        // Crear wrapper
+            const img = slide.querySelector(this.config.imageSelector);
+            if (img && !img.loading) img.loading = 'lazy';
+        });
+    }
+
+    createSlidesFromArray() {
         const wrapper = document.createElement('div');
         wrapper.className = 'aele__slider-wrapper';
-        this.container.appendChild(wrapper);
 
-        // Crear slides
-        this.config.images.forEach((img, index) => {
+        this.slides = this.config.images.map((img, index) => {
             const slide = document.createElement('div');
             slide.className = `aele__slider-item ${index === 0 ? 'active' : ''}`;
             slide.dataset.index = index;
@@ -72,54 +80,50 @@ class Slider {
             imgElement.src = img;
             imgElement.alt = `Slide ${index + 1}`;
             imgElement.loading = 'lazy';
+            imgElement.className = 'aele__slider-image';
 
             slide.appendChild(imgElement);
             wrapper.appendChild(slide);
+            return slide;
         });
 
-        // Crear flechas de navegación
-        const prevArrow = document.createElement('div');
-        prevArrow.className = 'aele__slider-arrow aele__prev';
-        prevArrow.style.width = `${this.config.arrowSize}px`;
-        prevArrow.style.height = `${this.config.arrowSize}px`;
-        prevArrow.innerHTML = `<span style="font-size: ${this.config.arrowSize / 2.5}px;">&lsaquo;</span>`;
-        prevArrow.setAttribute('aria-label', 'Previous slide');
-        wrapper.appendChild(prevArrow);
+        this.container.appendChild(wrapper);
+    }
 
-        const nextArrow = document.createElement('div');
-        nextArrow.className = 'aele__slider-arrow aele__next';
-        nextArrow.innerHTML = `<span style="font-size: ${this.config.arrowSize / 2.5}px;">&rsaquo;</span>`;
-        nextArrow.style.width = `${this.config.arrowSize}px`;
-        nextArrow.style.height = `${this.config.arrowSize}px`;
-        nextArrow.setAttribute('aria-label', 'Next slide');
-        wrapper.appendChild(nextArrow);
+    createNavigation() {
+        if (this.config.arrows) {
+            if (!this.container.querySelector('.aele__slider-arrow.aele__prev')) {
+                this.prevArrow = document.createElement('div');
+                this.prevArrow.className = 'aele__slider-arrow aele__prev';
+                this.prevArrow.innerHTML = '&lsaquo;';
+                this.container.appendChild(this.prevArrow);
+            }
 
-        // Crear paginación si está habilitada
-        if (this.config.pagination) {
+            if (!this.container.querySelector('.aele__slider-arrow.aele__next')) {
+                this.nextArrow = document.createElement('div');
+                this.nextArrow.className = 'aele__slider-arrow aele__next';
+                this.nextArrow.innerHTML = '&rsaquo;';
+                this.container.appendChild(this.nextArrow);
+            }
+        }
+
+        if (this.config.pagination && !this.container.querySelector('.aele__slider-pagination')) {
             const pagination = document.createElement('div');
             pagination.className = 'aele__slider-pagination';
 
-            this.config.images.forEach((_, index) => {
+            Array.from(this.slides).forEach((_, index) => {
                 const dot = document.createElement('div');
                 dot.className = `aele__slider-dot ${index === 0 ? 'active' : ''}`;
                 dot.dataset.index = index;
-                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
                 pagination.appendChild(dot);
             });
 
-            wrapper.appendChild(pagination);
+            this.container.appendChild(pagination);
+            this.dots = this.container.querySelectorAll('.aele__slider-dot');
         }
-
-        // Guardar referencias a los elementos
-        this.wrapper = wrapper;
-        this.slides = this.container.querySelectorAll('.aele__slider-item');
-        this.prevArrow = this.container.querySelector('.aele__prev');
-        this.nextArrow = this.container.querySelector('.aele__next');
-        this.dots = this.container.querySelectorAll('.aele__slider-dot');
     }
 
     setupEventListeners() {
-        // Eventos para flechas
         if (this.prevArrow) {
             this.prevArrow.addEventListener('click', () => this.prev());
         }
@@ -128,7 +132,6 @@ class Slider {
             this.nextArrow.addEventListener('click', () => this.next());
         }
 
-        // Eventos para dots de paginación
         if (this.dots) {
             this.dots.forEach(dot => {
                 dot.addEventListener('click', () => {
@@ -148,25 +151,21 @@ class Slider {
     }
 
     updateSlide(index) {
-        // Validar índice
         if (index < 0) index = this.slides.length - 1;
         if (index >= this.slides.length) index = 0;
 
-        // Actualizar slides
         this.slides.forEach((slide, i) => {
             const isActive = i === index;
             slide.classList.toggle('active', isActive);
             slide.setAttribute('aria-hidden', !isActive);
         });
 
-        // Actualizar paginación
         if (this.dots) {
             this.dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
         }
 
-        // Actualizar índice actual
         this.currentIndex = index;
     }
 
