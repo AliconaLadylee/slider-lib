@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Modular</title>
+
+    <link rel="stylesheet" href="slider-library.css">
+
+    <style>
+        .slider-container {
+            width: 100%;
+            height: 60vh;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <h1>Mi Slider Personalizado</h1>
+        <div id="main-slider"></div>
+
+        <div id="main-slider2"></div>
+    </div>
+
+    <script src="slider-library.js"></script>
+
+    <script>
+        const slider1 = new Slider('#main-slider', {
+            images: [
+                'https://picsum.photos/1200/600?random=1',
+                'https://picsum.photos/1200/600?random=2',
+                'https://picsum.photos/1200/600?random=3',
+                'https://picsum.photos/1200/600?random=4'
+            ],
+            autoplay: true,
+        });
+
+
+        const slider2 = new Slider('#main-slider2', {
+            images: [
+                'https://picsum.photos/1200/600?random=1',
+                'https://picsum.photos/1200/600?random=2',
+                'https://picsum.photos/1200/600?random=3',
+                'https://picsum.photos/1200/600?random=4'
+            ],
+            autoplay: true,
+        });
+    </script>
+</body>
+
+</html>
