@@ -1,6 +1,7 @@
 // slider-library.js
 
 class Slider {
+
     constructor(selector, options = {}) {
         this.defaults = {
             images: [],
@@ -14,6 +15,7 @@ class Slider {
 
             slideSelector: '.aele__slider-item',
             imageSelector: 'img',
+            userInteractionOver: true,
         };
 
         this.config = { ...this.defaults, ...options };
@@ -22,6 +24,8 @@ class Slider {
         this.autoplayInterval = null;
         this.userInteracted = false;
         this.interactionTimeout = null;
+        
+        this.mouseIsOver = false;
 
         this.init();
     }
@@ -46,6 +50,7 @@ class Slider {
 
 
         this.container.classList.add('aele__slider-container');
+
         this.createNavigation();
         this.setupEventListeners();
 
@@ -58,6 +63,9 @@ class Slider {
         this.slides.forEach((slide, index) => {
             slide.dataset.index = index;
             slide.classList.add('aele__slider-item');
+
+            slide.style.transitionDuration = `${this.config.transitionDuration}ms`;
+
             slide.classList.toggle('active', index === 0);
             slide.setAttribute('aria-hidden', index !== 0);
 
@@ -94,15 +102,19 @@ class Slider {
         if (this.config.arrows) {
             if (!this.container.querySelector('.aele__slider-arrow.aele__prev')) {
                 this.prevArrow = document.createElement('div');
+                this.prevArrow.style.width = `${this.config.arrowSize}px`;
+                this.prevArrow.style.height = `${this.config.arrowSize}px`;
                 this.prevArrow.className = 'aele__slider-arrow aele__prev';
-                this.prevArrow.innerHTML = '&lsaquo;';
+                this.prevArrow.innerHTML = `<span style="font-size: ${this.config.arrowSize / 2.5}px;">&lsaquo;</span>`;
                 this.container.appendChild(this.prevArrow);
             }
 
             if (!this.container.querySelector('.aele__slider-arrow.aele__next')) {
                 this.nextArrow = document.createElement('div');
+                this.nextArrow.style.width = `${this.config.arrowSize}px`;
+                this.nextArrow.style.height = `${this.config.arrowSize}px`;
                 this.nextArrow.className = 'aele__slider-arrow aele__next';
-                this.nextArrow.innerHTML = '&rsaquo;';
+                this.nextArrow.innerHTML = `<span style="font-size: ${this.config.arrowSize / 2.5}px;">&rsaquo;</span>`;
                 this.container.appendChild(this.nextArrow);
             }
         }
@@ -125,11 +137,11 @@ class Slider {
 
     setupEventListeners() {
         if (this.prevArrow) {
-            this.prevArrow.addEventListener('click', () => this.prev());
+            this.prevArrow.addEventListener('click', () => this.prev(true));
         }
 
         if (this.nextArrow) {
-            this.nextArrow.addEventListener('click', () => this.next());
+            this.nextArrow.addEventListener('click', () => this.next(true));
         }
 
         if (this.dots) {
@@ -141,13 +153,17 @@ class Slider {
             });
         }
 
-        // Pausar autoplay al hacer hover
-        this.container.addEventListener('mouseenter', () => this.pause());
-        this.container.addEventListener('mouseleave', () => {
-            if (!this.userInteracted) this.startAutoplay();
-        });
+        if (this.config.userInteractionOver) {
+            this.container.addEventListener('mouseenter', () => {
+                this.pause();
+                this.mouseIsOver = true;
+            });
 
-
+            this.container.addEventListener('mouseleave', () => {
+                if (!this.userInteracted) this.startAutoplay();
+                this.mouseIsOver = false;
+            });
+        }
     }
 
     updateSlide(index) {
@@ -169,14 +185,14 @@ class Slider {
         this.currentIndex = index;
     }
 
-    next() {
+    next(eventUser = false) {
         this.updateSlide(this.currentIndex + 1);
-        this.handleUserInteraction();
+        if (eventUser) this.handleUserInteraction();
     }
 
-    prev() {
+    prev(eventUser = false) {
         this.updateSlide(this.currentIndex - 1);
-        this.handleUserInteraction();
+        if (eventUser) this.handleUserInteraction();
     }
 
     goTo(index) {
@@ -185,7 +201,7 @@ class Slider {
     }
 
     startAutoplay() {
-        this.pause(); // Limpiar cualquier intervalo existente
+        this.pause();
         this.autoplayInterval = setInterval(() => {
             if (!this.userInteracted) this.next();
         }, this.config.delay);
@@ -198,7 +214,6 @@ class Slider {
     handleUserInteraction() {
         this.userInteracted = true;
         this.pause();
-
         clearTimeout(this.interactionTimeout);
         this.interactionTimeout = setTimeout(() => {
             this.userInteracted = false;

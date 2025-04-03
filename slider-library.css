@@ -115,13 +115,13 @@
 
 @media (max-width: 768px) {
   .aele__slider-container {
-    height: 35vh;
+    height: 30vh;
   }
 }
 
 @media (max-width: 640px) {
   .aele__slider-container {
-    height: 30vh;
+    height: 35vh;
   }
 }
 
