@@ -4,7 +4,7 @@
 .aele__slider-container {
   position: relative;
   width: 100%;
-  height: 60vh;
+  height: 100%;
   overflow: hidden;
   margin: 0 auto;
 }
@@ -98,8 +98,7 @@
 
 
 
-/* Estilos responsivos */
-
+/* Estilos responsivos
 @media (max-width: 1024px) {
   .aele__slider-container {
     height: 60vh;
@@ -141,4 +140,4 @@
   .aele__slider-container {
     height: 10vh;
   }
-}
+} */

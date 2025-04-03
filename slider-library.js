@@ -6,8 +6,8 @@ class Slider {
         this.defaults = {
             images: [],
             autoplay: true,
-            delay: 5000,
-            transitionDuration: 500,
+            delay: 3000,
+            transitionDuration: 1000,
             arrows: true,
             arrowSize: 50,
             arrowMargin: 20,
@@ -16,15 +16,17 @@ class Slider {
             slideSelector: '.aele__slider-item',
             imageSelector: 'img',
             userInteractionOver: true,
+            paginationDots: 10,
         };
 
         this.config = { ...this.defaults, ...options };
         this.container = document.querySelector(selector);
-        this.currentIndex = 0;
+
+        this.slides = [];
         this.autoplayInterval = null;
-        this.userInteracted = false;
         this.interactionTimeout = null;
-        
+        this.currentIndex = 0;
+        this.userInteracted = false;
         this.mouseIsOver = false;
 
         this.init();
@@ -36,17 +38,22 @@ class Slider {
             return;
         }
 
-        const existingSlides = this.container.querySelectorAll(this.config.slideSelector);
+        const existingSlides = this.container.querySelectorAll(this.config.slideSelector) ?? [];
+
         if (existingSlides.length > 0) {
             this.slides = existingSlides;
             this.setupExistingSlides();
-        } else if (this.config.images && this.config.images.length > 0) {
+        }
 
+        if (this.config.images && this.config.images.length > 0) {
             this.createSlidesFromArray();
-        } else {
+        }
+
+        if (this.slides.length === 0) {
             console.error('No slides or images provided for the slider');
             return;
         }
+
 
 
         this.container.classList.add('aele__slider-container');
@@ -78,7 +85,9 @@ class Slider {
         const wrapper = document.createElement('div');
         wrapper.className = 'aele__slider-wrapper';
 
-        this.slides = this.config.images.map((img, index) => {
+        const slides = this.config.images.map((img, i) => {
+            const index = i + this.slides.length;
+
             const slide = document.createElement('div');
             slide.className = `aele__slider-item ${index === 0 ? 'active' : ''}`;
             slide.dataset.index = index;
@@ -94,6 +103,8 @@ class Slider {
             wrapper.appendChild(slide);
             return slide;
         });
+
+        this.slides = [...this.slides, ...slides];
 
         this.container.appendChild(wrapper);
     }
@@ -124,10 +135,12 @@ class Slider {
             pagination.className = 'aele__slider-pagination';
 
             Array.from(this.slides).forEach((_, index) => {
-                const dot = document.createElement('div');
-                dot.className = `aele__slider-dot ${index === 0 ? 'active' : ''}`;
-                dot.dataset.index = index;
-                pagination.appendChild(dot);
+                if (index < this.config.paginationDots) {
+                    const dot = document.createElement('div');
+                    dot.className = `aele__slider-dot ${index === 0 ? 'active' : ''}`;
+                    dot.dataset.index = index;
+                    pagination.appendChild(dot);
+                }
             });
 
             this.container.appendChild(pagination);
@@ -176,13 +189,36 @@ class Slider {
             slide.setAttribute('aria-hidden', !isActive);
         });
 
-        if (this.dots) {
-            this.dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-        }
-
         this.currentIndex = index;
+
+        this.updatePagination();
+    }
+
+    updatePagination() {
+        if (this.dots) {
+            const current = Number(this.currentIndex);
+
+            if (current >= this.config.paginationDots) {
+                const startIndex = current - this.config.paginationDots + 1;
+                
+                this.dots.forEach((dot, i) => {
+                    const newIndex = startIndex + i;
+                    dot.dataset.index = newIndex.toString();
+                });
+            }
+
+            if (current == 0) {
+                this.dots.forEach((dot, i) => {
+                    dot.dataset.index = (i ).toString();
+                });
+            }
+
+            this.dots.forEach(dot => {
+                const dotIndex = parseInt(dot.dataset.index); 
+                dot.classList.toggle('active', dotIndex === current);
+            });
+
+        }
     }
 
     next(eventUser = false) {
@@ -225,4 +261,6 @@ class Slider {
         this.pause();
         this.container.innerHTML = '';
     }
+
+
 }
